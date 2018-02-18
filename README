@@ -1,0 +1,18 @@
+Databases:
+
+movies:
+    id integer
+    movie text
+    year integer
+    url text
+
+watched:
+    viewnum integer
+    id integer
+    date_watched text
+    medium text
+
+towatch:
+    id integer
+
+
