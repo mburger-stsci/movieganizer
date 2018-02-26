@@ -29,4 +29,4 @@ def textbackup(dbfile):
 
     with open('MoviesToWatch.dat', 'w') as f:
         for r in result:
-            f.write('{} : {}\n'.format(r[0], r[1]))
+            f.write('{} : {})\n'.format(r[0], r[1]))

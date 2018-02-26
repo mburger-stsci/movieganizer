@@ -1,5 +1,5 @@
 import sqlite3
-from get_movie_id import get_movie_id
+from get_imdb_movie import get_imdb_movie
 from datetime import date
 
 
@@ -20,7 +20,7 @@ def add_watched_movie(dbfile):
     medium = input('How did you watch it? ').strip()
 
     # Get movie id from database or add it
-    idnum = get_movie_id(dbfile, title, year)
+    idnum, movie = get_movie_id(dbfile, title, year)
 
     # Remove from to watch list if necessary
     con = sqlite3.connect(dbfile)
@@ -50,7 +50,7 @@ def add_to_watch(dbfile):
     year = input('What year was it made? ').strip()
 
     # Get movie id from database or add it
-    idnum = get_movie_id(dbfile, title, year)
+    idnum, movie = get_movie_id(dbfile, title, year)
 
     # Check to see if movie is already in watch list
     con = sqlite3.connect(dbfile)

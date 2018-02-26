@@ -4,7 +4,6 @@ movies:
     id integer
     movie text
     year integer
-    url text
 
 watched:
     viewnum integer
@@ -15,4 +14,18 @@ watched:
 towatch:
     id integer
 
+######
+
+Methods:
+
+initialize_db(dbfile)
+get_movie_list(con)
+get_imdb_movie(dbfile, title, year)
+add_watched_movie(dbfile)
+add_to_watch(dbfile)
+read_movie_list(mfile)
+textbackup(dbfile)
+
+Methods still to write:
+open_url(m_id)
 

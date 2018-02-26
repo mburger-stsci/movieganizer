@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import date
+from get_imdb_movie import get_imdb_movie
 
 def get_movie_list(con):
     # Add in the old list of movies
@@ -9,42 +10,37 @@ def get_movie_list(con):
         for line in f.readlines():
             pieces = line.split(':')
             l = tuple(p.strip() for p in pieces)
+            if len(l) != 4:
+                print(l)
             movielist.append(l)
 
-    allmovies = set((a, b) for a, b, _, _ in movielist)
-    for i, movie in enumerate(allmovies):
-        cur.execute('''insert into movies(id, movie, year)
-                       values (?, ?, ?)''', (i, movie[0], movie[1]))
-    con.commit()
+    for m in movielist:
+        if '_' in m[0]:
+            m[0].replace('_', ':')
 
     # Sort movies watched by date
     movielist.sort(key=lambda x: x[2])
 
-    # make table of watched movies
-    for movie in movielist:
-        cur.execute('''select id from movies
-                       where movie=? and year=?''',
-                    (movie[0], movie[1]))
+    # Unique list of movies
+    allmovies = set((a, b) for a, b, _, _ in movielist)
 
-        ii = cur.fetchall()
-        assert len(ii) == 1, 'A movie made it in twice'
+    for movie in allmovies:
+        # Find movie in imdb and
+        idnum = get_imdb_movie(con, movie[0], movie[1])
 
-        ii = ii[0][0]
-        try:
-            yr, mon, dy = movie[2].split('-')
-            cur.execute('''insert
-                           into watched(id, date_watched, medium)
-                           values (?, ?, ?)''',
-                        (ii, date(int(yr), int(mon), int(dy)), movie[3]))
-        except:
-            assert 0, '{}: Date format error'.format(movie[2])
-        con.commit()
+        # Insert movie in to watched movie table
+        for watched_movie in movielist:
+            if ((watched_movie[0] == movie[0]) and
+                (watched_movie[1] == movie[1])):
+                yr, mon, dy = watched_movie[2].split('-')
+                cur.execute('''insert
+                               into watched(id, date_watched, medium)
+                               values (?, ?, ?)''',
+                            (idnum,
+                             date(int(yr), int(mon), int(dy)),
+                             watched_movie[3]))
+                con.commit()
 
-    # Do the same for MoviesToWatch.dat
-    towatchlist = []
-    with open('MoviesToWatch.dat') as f:
-        for line in f.readlines():
-            pieces = line.split()
 
 def initialize_db(dbfile):
     # Create the database
@@ -55,8 +51,7 @@ def initialize_db(dbfile):
     movie_sql = '''create table movies (
                        id integer,
                        movie text,
-                       year integer,
-                       url text)'''
+                       year integer)'''
     cur.execute(movie_sql)
     con.commit()
 
@@ -72,7 +67,9 @@ def initialize_db(dbfile):
     get_movie_list(con)
 
     # Make table of movies to watch
-    cur.execute('''create table towatch (id integer primary key)''')
+    cur.execute('''create table towatch (
+                        id integer primary key,
+                        date_added text)''')
     con.commit()
 
     # Close the connection
