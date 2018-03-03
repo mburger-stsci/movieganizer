@@ -20,8 +20,7 @@ def get_imdb_movie(db, title, year):
                 t = m['title'] if 'title' in m.keys() else None
                 y = m['year'] if 'year' in m.keys() else None
                 print('({}) {} ({})'.format(i+1, t, y))
-            #num = input('Which movie did you watch (0 for none of these)? ')
-            num = 1
+            num = input('Which movie did you watch (0 for none of these)? ')
             try:
                 n = int(num)
             except:
@@ -30,15 +29,17 @@ def get_imdb_movie(db, title, year):
                 # Get the IMDB id number
                 movie = search[n-1]
                 idnum = movie.getID()
-                t = movie['title'] if 'title' in movie.keys() else title
-                y = movie['year'] if 'year' in movie.keys() else year
-
-                # Add movie into movies
-                cur.execute('''insert into movies(id, movie, year)
-                               values (?, ?, ?)''', (idnum, t, y))
-                con.commit()
             else:
-                idnum, movie = -1, None
+                idnum = input('Enter idnum manually: ')
+                movie = ia.get_movie(idnum)
+
+            t = movie['title'] if 'title' in movie.keys() else title
+            y = movie['year'] if 'year' in movie.keys() else year
+
+            # Add movie into movies
+            cur.execute('''insert into movies(id, movie, year)
+                           values (?, ?, ?)''', (idnum, t, y))
+            con.commit()
         else:
             print('No possible movies found')
 
@@ -59,4 +60,4 @@ def get_imdb_movie(db, title, year):
 
     if type(db) == str:
         con.close()
-    return idnum
+    return idnum, movie
